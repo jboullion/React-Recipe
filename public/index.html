@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>React Recipes</title>
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+
+	<!-- Get our Dist CSS Styles -->
+	<link rel="stylesheet" href="css/live.css" />
+
+</head>
+
+<body>
+	<div id="errors"></div>
+
+	<div class="wrapper">
+		<div class="container">
+			<h1>React Recipes</h1>
+			<div id="app">
+
+			</div>
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Recipe Name</th>
+						<th>Description</th>
+						<th>Date</th>
+						<th>Edit</th>
+						<th>Delete</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr role="button">
+						<td data-toggle="collapse" href="#recipe-1" aria-expanded="false">1</td>
+						<td data-toggle="collapse" href="#recipe-1" aria-expanded="false">Good Food</td>
+						<td data-toggle="collapse" href="#recipe-1" aria-expanded="false">This is the best food.</td>
+						<td data-toggle="collapse" href="#recipe-1" aria-expanded="false">01/10/2017</td>
+						<td><button type="button" class="btn btn-warning">Edit</button></td>
+						<td><button type="button" class="btn btn-danger">Delete</button></td>
+					</tr>
+					<tr>
+						<td colspan="6"><div class="collapse" id="recipe-1">Ingredient 1</div></td>
+					</tr>
+					<tr role="button">
+						<td data-toggle="collapse" href="#recipe-2" aria-expanded="false">1</td>
+						<td data-toggle="collapse" href="#recipe-2" aria-expanded="false">Good Food</td>
+						<td data-toggle="collapse" href="#recipe-2" aria-expanded="false">This is the best food.</td>
+						<td data-toggle="collapse" href="#recipe-2" aria-expanded="false">01/10/2017</td>
+						<td><button type="button" class="btn btn-warning">Edit</button></td>
+						<td><button type="button" class="btn btn-danger">Delete</button></td>
+					</tr>
+					<tr>
+						<td colspan="6"><div class="collapse" id="recipe-2">Ingredient 1</div></td>
+					</tr>
+				</tbody>
+				<tfoot>
+					<tr>
+						<td colspan="6"><button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal">Add Recipe</button></td>
+					</tr>
+				</tfoot>
+			</table>
+
+			<!-- Modal -->
+			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title" id="myModalLabel">Add Recipe</h4>
+						</div>
+						<div class="modal-body">
+							<table class="table">
+								<tbody>
+									<tr>
+										<th>Name</th>
+										<td><input type="text" class="form-control" id=""/></td>
+									</tr>
+									<tr>
+										<th>Description</th>
+										<td><input type="text" class="form-control" id=""/></td>
+									</tr>
+									<tr>
+										<th>Ingredients</th>
+										<td><textarea class="form-control" style="resize: none;" id="ingredients" rows="5"></textarea></td>
+									</tr>
+								</tbody>
+							</table>
+
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-primary">Save</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- jQuery -->
+	<script
+	src="https://code.jquery.com/jquery-3.1.1.slim.min.js"
+	integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc="
+	crossorigin="anonymous"></script>
+
+	<!-- Bootstrap JS -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+	<!-- React -->
+	<script src="https://unpkg.com/react@15/dist/react.js"></script>
+	<script src="https://unpkg.com/react-dom@15/dist/react-dom.js"></script>
+
+	<!-- React Error Handler -->
+	<script type='text/javascript' src="scripts/errors.js"></script>
+
+	<!-- Custom JS file -->
+	<script type='text/javascript' src="scripts/live.js"></script>
+
+</body>
+</html>
