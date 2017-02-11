@@ -18,7 +18,7 @@ body {
  }
 
 body {
-	overflow-y: auto;
+	overflow-y: scroll;
 	overflow-x: hidden;
 }
 
@@ -28,6 +28,12 @@ h1 {
 	line-height: 1.2;
 	letter-spacing: 1px;
 	max-width: 100%;
+}
+
+h3 {
+	color: #333;
+	margin-top: 0;
+	margin-bottom: 20px;
 }
 
 h4 {
@@ -51,6 +57,7 @@ button.btn {
 	color: #333;
 }
 table.table-striped {
+	margin-bottom: 0;
 	width: 100%;
 
 	thead {
@@ -95,6 +102,32 @@ table.table-striped {
 			border-top-right-radius: 5px;
 		}
 	}
+
+	td {
+		&.index {
+			width: 50px;
+		}
+
+		&.name {
+			width: 200px;
+		}
+
+		&.description {
+
+		}
+
+		&.date {
+			width: 120px;
+		}
+
+		&.edit {
+			width: 100px;
+		}
+
+		&.delete {
+			width: 100px;
+		}
+	}
 }
 
 .sort-by {
@@ -122,4 +155,34 @@ table.table-striped {
 	border-left: 5px solid transparent;
 	border-right: 5px solid transparent;
 	border-bottom: 5px solid #333;
+}
+
+.col-50 {
+	float: left;
+	    padding: 15px;
+	width: 50%;
+}
+
+#app {
+	margin: 30px 0;
+}
+
+/**
+ * RECIPE
+ */
+.recipe {
+}
+
+.recipe .description {
+	border-bottom: 1px dashed #000;
+	margin-bottom: 30px;
+	padding-bottom: 30px;
+}
+
+.recipe .instructions {
+	margin-bottom: 30px;
+
+}
+
+.recipe .ingredients {
 }
