@@ -1,4 +1,106 @@
 
+function AddModal(){
+	return <div className="modal fade" id="addModal" tabIndex="-1" role="dialog" aria-labelledby="addModalLabel">
+			<div className="modal-dialog" role="document">
+				<div className="modal-content">
+					<div className="modal-header">
+						<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 className="modal-title" id="addModalLabel">Add Recipe</h4>
+					</div>
+					<div className="modal-body">
+						<table className="table">
+							<tbody>
+								<tr>
+									<th>Name</th>
+									<td><input type="text" className="form-control" id="add-name"/></td>
+								</tr>
+								<tr>
+									<th>Description</th>
+									<td><input type="text" className="form-control" id="add-description"/></td>
+								</tr>
+								<tr>
+									<th>Instructions</th>
+									<td><textarea className="form-control" style={{resize: "none"}} id="add-instructions" rows="5"></textarea></td>
+								</tr>
+								<tr>
+									<th>Ingredients</th>
+									<td><textarea className="form-control" style={{resize: "none"}} id="add-ingredients" rows="5"></textarea></td>
+								</tr>
+							</tbody>
+						</table>
+
+					</div>
+					<div className="modal-footer">
+						<button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
+						<button type="button" className="btn btn-primary" id="add-save">Save</button>
+					</div>
+				</div>
+			</div>
+		</div>;
+}
+
+function EditModal(){
+	return <div className="modal fade" id="editModal" tabIndex="-1" role="dialog" aria-labelledby="editModalLabel">
+			<div className="modal-dialog" role="document">
+				<div className="modal-content">
+					<div className="modal-header">
+						<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 className="modal-title" id="addModalLabel">Edit Recipe</h4>
+					</div>
+					<div className="modal-body">
+						<table className="table">
+							<tbody>
+								<tr>
+									<th>Name</th>
+									<td><input type="text" className="form-control" id="edit-name"/></td>
+								</tr>
+								<tr>
+									<th>Description</th>
+									<td><input type="text" className="form-control" id="edit-description"/></td>
+								</tr>
+								<tr>
+									<th>Instructions</th>
+									<td><textarea className="form-control" style={{resize: "none"}} id="edit-instructions" rows="5"></textarea></td>
+								</tr>
+								<tr>
+									<th>Ingredients</th>
+									<td><textarea className="form-control" style={{resize: "none"}} id="edit-ingredients" rows="5"></textarea></td>
+								</tr>
+							</tbody>
+						</table>
+
+					</div>
+					<div className="modal-footer">
+						<button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
+						<button type="button" className="btn btn-primary" id="edit-save" data-edit="">Save</button>
+					</div>
+				</div>
+			</div>
+		</div>;
+}
+
+function DeleteModal(){
+	return <div className="modal fade" id="deleteModal" tabIndex="-1" role="dialog" aria-labelledby="deleteModalLabel">
+			<div className="modal-dialog" role="document">
+				<div className="modal-content">
+					<div className="modal-header">
+						<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 className="modal-title" id="addModalLabel">Delete Recipe</h4>
+					</div>
+					<div className="modal-body">
+						<h3>Are you sure you want to delete "Recipe Name"?</h3>
+
+					</div>
+					<div className="modal-footer">
+						<button type="button" className="btn btn-default" data-dismiss="modal">CANCEL</button>
+						<button type="button" className="btn btn-danger" id="delete" data-delete="">DELETE</button>
+					</div>
+				</div>
+			</div>
+		</div>;
+}
+
+
 function Ingredient(props) {
 	var ingredientList = [];
 	for (var i=0; i < props.recipe.ingredients.length; i++) {
@@ -13,7 +115,7 @@ function Ingredient(props) {
 					<td className="description" data-toggle="collapse" href={'#recipe-'+props.recipe.id} aria-expanded="false">{props.recipe.description}</td>
 					<td className="date" data-toggle="collapse" href={'#recipe-'+props.recipe.id} aria-expanded="false">{props.recipe.date}</td>
 					<td className="edit"><button type="button" className="btn btn-warning" data-toggle="modal" data-target="#editModal" data-recipe={props.recipe.id}>Edit</button></td>
-					<td className="delete"><button type="button" className="btn btn-danger" data-recipe={props.recipe.id}>Delete</button></td>
+					<td className="delete"><button type="button" className="btn btn-danger" data-toggle="modal" data-target="#deleteModal" data-recipe={props.recipe.id}>Delete</button></td>
 				</tr>
 				<tr className={'recipe-'+props.recipe.id}>
 					<td colSpan="6">
@@ -38,8 +140,6 @@ function Ingredient(props) {
 				</tr>
 			</tbody>
 		</table>;
-
-
 }
 
 function Ingredients(props) {
@@ -81,6 +181,11 @@ class App extends React.Component {
 
 	componentWillMount(){
 
+		//save data. Will save to local storage first and fallback to cookies
+		storeLocal("recipes", this.state.recipes);
+		// Retrieve
+		var localRecipes = getLocal("recipes");
+
 	}
 
 	handleClick(){
@@ -88,9 +193,15 @@ class App extends React.Component {
 	}
 
 	render() {
-		return <Ingredients recipes={this.state.recipes} />;
+		return <div>
+				<Ingredients recipes={this.state.recipes} />
+				<AddModal />
+				<EditModal />
+				<DeleteModal />
+			</div>;
 	}
 }
+
 
 // ========================================
 
@@ -98,3 +209,81 @@ ReactDOM.render(
 	<App />,
 	document.getElementById('app')
 );
+
+
+
+// ====================================
+//              FUNCTIONS
+// ====================================
+
+
+ /**
+  * SAVE any value to local storage
+  * @param string Storage name
+  * @param mixed Storage Value
+  */
+ function storeLocal(name, value){
+ 	if (typeof(Storage) !== "undefined") {
+ 		localStorage.setItem(name, JSON.stringify(value));
+ 	}else{
+ 		//if we do not have local storage for some reason try to use cookies
+ 		//we are just saving for 1 day for now
+ 		setCookie(name, JSON.stringify(value), 1);
+ 	}
+ }
+
+ /**
+  * GET any value to local storage
+  * @param  string cname  Storage Name
+  * @return string        Storage Value
+  */
+ function getLocal(name){
+
+ 	if (typeof(Storage) !== "undefined") {
+ 		return JSON.parse(localStorage.getItem(name));
+ 	}else{
+ 		//if we do not have local storage for some reason try to use cookies
+ 		return JSON.parse(getCookie(name));
+ 	}
+ }
+
+ /**
+  * Set a Cookie
+  * @param string cname  Cookie Name
+  * @param mixed cvalue  Cookie Value
+  * @param int exdays How many days before expire
+  */
+ function setCookie(cname, cvalue, exdays) {
+ 	var d = new Date();
+ 	d.setTime(d.getTime() + (exdays*24*60*60*1000));
+ 	var expires = "expires="+ d.toUTCString();
+ 	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+ }
+
+ /**
+  * Get a cookie
+  * @param  string cname  Cookie Name
+  * @return string        Cookie Value
+  */
+ function getCookie(cname) {
+ 	var name = cname + "=";
+ 	var ca = document.cookie.split(';');
+ 	for(var i = 0; i <ca.length; i++) {
+ 		var c = ca[i];
+ 		while (c.charAt(0)==' ') {
+ 			c = c.substring(1);
+ 		}
+ 		if (c.indexOf(name) == 0) {
+ 			return c.substring(name.length,c.length);
+ 		}
+ 	}
+ 	return "";
+ }
+
+ /**
+  * Delete a Cookie
+  * @param string cname  Cookie Name
+  */
+ function deleteCookie(cname) {
+ 	setCookie(cname, '', -1);
+ }
