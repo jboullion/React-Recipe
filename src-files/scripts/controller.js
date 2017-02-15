@@ -1,110 +1,221 @@
 
-function AddModal(){
-	return <div className="modal fade" id="addModal" tabIndex="-1" role="dialog" aria-labelledby="addModalLabel">
-			<div className="modal-dialog" role="document">
-				<div className="modal-content">
-					<div className="modal-header">
-						<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-						<h4 className="modal-title" id="addModalLabel">Add Recipe</h4>
-					</div>
-					<div className="modal-body">
-						<table className="table">
-							<tbody>
-								<tr>
-									<th>Name</th>
-									<td><input type="text" className="form-control" id="add-name"/></td>
-								</tr>
-								<tr>
-									<th>Description</th>
-									<td><input type="text" className="form-control" id="add-description"/></td>
-								</tr>
-								<tr>
-									<th>Instructions</th>
-									<td><textarea className="form-control" style={{resize: "none"}} id="add-instructions" rows="5"></textarea></td>
-								</tr>
-								<tr>
-									<th>Ingredients</th>
-									<td><textarea className="form-control" style={{resize: "none"}} id="add-ingredients" rows="5"></textarea></td>
-								</tr>
-							</tbody>
-						</table>
+class AddModal extends React.Component {
 
-					</div>
-					<div className="modal-footer">
-						<button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
-						<button type="button" className="btn btn-primary" id="add-save">Save</button>
+	constructor(props) {
+		super(props);
+		this.state = {
+			name: '',
+			description: '',
+			instructions: '',
+			ingredients: '',
+			errors: {
+				name: '',
+				description: '',
+				instructions: '',
+				ingredients: ''
+			}
+		};
+
+		this.handleInputChange = this.handleInputChange.bind(this);
+		this.handleSubmit = this.handleSubmit.bind(this);
+	}
+
+	//Set this components state based on the name of the input
+	handleInputChange(event) {
+		const value = event.target.value;
+		const name = event.target.name;
+
+		this.setState({
+			[name]: value
+		});
+	}
+
+	//Validation and submission to parent for state change
+	handleSubmit(event) {
+		const errors = this.state.errors;
+		let hasErrors = false;
+
+		if(! this.state.name){
+			errors.name = 'has-error';
+			hasErrors = true;
+		}else{
+			errors.name = '';
+		}
+
+		if(! this.state.description){
+			errors.description = 'has-error';
+			hasErrors = true;
+		}else{
+			errors.description = '';
+		}
+
+		if(! this.state.instructions){
+			errors.instructions = 'has-error';
+			hasErrors = true;
+		}else{
+			errors.instructions = '';
+		}
+
+		if(! this.state.ingredients){
+			errors.ingredients = 'has-error';
+			hasErrors = true;
+		}else{
+			errors.ingredients = '';
+		}
+
+		if(hasErrors === false){
+			//Success!
+			this.props.onClick(this.state);
+		}else{
+			//Error!
+			this.setState({
+				errors: errors
+			});
+		}
+
+	}
+
+	render() {
+		return (
+			<div className="modal fade" id="addModal" tabIndex="-1" role="dialog" aria-labelledby="addModalLabel">
+				<div className="modal-dialog" role="document">
+					<div className="modal-content">
+						<div className="modal-header">
+							<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 className="modal-title" id="addModalLabel">Add Recipe</h4>
+						</div>
+						<div className="modal-body">
+							<table className="table">
+								<tbody>
+									<tr>
+										<th>Name</th>
+										<td className={this.state.errors.name}><input type="text" className="form-control" id="add-name"
+										name="name"
+										value={this.state.name}
+										onChange={this.handleInputChange} /></td>
+									</tr>
+									<tr>
+										<th>Description</th>
+										<td className={this.state.errors.description}><input type="text" className="form-control" id="add-description"
+										name="description"
+										value={this.state.description}
+										onChange={this.handleInputChange} /></td>
+									</tr>
+									<tr>
+										<th>Instructions</th>
+										<td className={this.state.errors.instructions}><textarea className="form-control" style={{resize: "none"}} id="add-instructions" rows="5"
+										name="instructions"
+										value={this.state.instructions}
+										onChange={this.handleInputChange} /></td>
+									</tr>
+									<tr>
+										<th>Ingredients</th>
+										<td className={this.state.errors.ingredients}><textarea className="form-control" style={{resize: "none"}} id="add-ingredients" rows="5"
+										name="ingredients"
+										value={this.state.ingredients}
+										onChange={this.handleInputChange} /></td>
+									</tr>
+								</tbody>
+							</table>
+
+						</div>
+						<div className="modal-footer">
+							<button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
+							<button type="button" className="btn btn-primary" id="add-save" onClick={() => this.handleSubmit(this.state)}>Save</button>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>;
+		);
+	}
 }
 
-function EditModal(){
-	return <div className="modal fade" id="editModal" tabIndex="-1" role="dialog" aria-labelledby="editModalLabel">
-			<div className="modal-dialog" role="document">
-				<div className="modal-content">
-					<div className="modal-header">
-						<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-						<h4 className="modal-title" id="addModalLabel">Edit Recipe</h4>
-					</div>
-					<div className="modal-body">
-						<table className="table">
-							<tbody>
-								<tr>
-									<th>Name</th>
-									<td><input type="text" className="form-control" id="edit-name"/></td>
-								</tr>
-								<tr>
-									<th>Description</th>
-									<td><input type="text" className="form-control" id="edit-description"/></td>
-								</tr>
-								<tr>
-									<th>Instructions</th>
-									<td><textarea className="form-control" style={{resize: "none"}} id="edit-instructions" rows="5"></textarea></td>
-								</tr>
-								<tr>
-									<th>Ingredients</th>
-									<td><textarea className="form-control" style={{resize: "none"}} id="edit-ingredients" rows="5"></textarea></td>
-								</tr>
-							</tbody>
-						</table>
+class EditModal extends React.Component {
 
-					</div>
-					<div className="modal-footer">
-						<button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
-						<button type="button" className="btn btn-primary" id="edit-save" data-edit="">Save</button>
+	constructor(props) {
+		super(props);
+
+	}
+
+	render() {
+		return (
+		 <div className="modal fade" id="editModal" tabIndex="-1" role="dialog" aria-labelledby="editModalLabel">
+				<div className="modal-dialog" role="document">
+					<div className="modal-content">
+						<div className="modal-header">
+							<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 className="modal-title" id="addModalLabel">Edit Recipe</h4>
+						</div>
+						<div className="modal-body">
+							<table className="table">
+								<tbody>
+									<tr>
+										<th>Name</th>
+										<td><input type="text" className="form-control" id="edit-name"/></td>
+									</tr>
+									<tr>
+										<th>Description</th>
+										<td><input type="text" className="form-control" id="edit-description"/></td>
+									</tr>
+									<tr>
+										<th>Instructions</th>
+										<td><textarea className="form-control" style={{resize: "none"}} id="edit-instructions" rows="5"></textarea></td>
+									</tr>
+									<tr>
+										<th>Ingredients</th>
+										<td><textarea className="form-control" style={{resize: "none"}} id="edit-ingredients" rows="5"></textarea></td>
+									</tr>
+								</tbody>
+							</table>
+
+						</div>
+						<div className="modal-footer">
+							<button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
+							<button type="button" className="btn btn-primary" id="edit-save" data-edit="" onClick={() => this.props.onClick(props.recipe)}>Save</button>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>;
+		);
+	}
 }
 
-function DeleteModal(){
-	return <div className="modal fade" id="deleteModal" tabIndex="-1" role="dialog" aria-labelledby="deleteModalLabel">
-			<div className="modal-dialog" role="document">
-				<div className="modal-content">
-					<div className="modal-header">
-						<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-						<h4 className="modal-title" id="addModalLabel">Delete Recipe</h4>
-					</div>
-					<div className="modal-body">
-						<h3>Are you sure you want to delete "Recipe Name"?</h3>
+class DeleteModal extends React.Component {
 
-					</div>
-					<div className="modal-footer">
-						<button type="button" className="btn btn-default" data-dismiss="modal">CANCEL</button>
-						<button type="button" className="btn btn-danger" id="delete" data-delete="">DELETE</button>
+	constructor(props) {
+		super(props);
+
+	}
+
+	render() {
+		return (
+			<div className="modal fade" id="deleteModal" tabIndex="-1" role="dialog" aria-labelledby="deleteModalLabel">
+				<div className="modal-dialog" role="document">
+					<div className="modal-content">
+						<div className="modal-header">
+							<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 className="modal-title" id="addModalLabel">Delete Recipe</h4>
+						</div>
+						<div className="modal-body">
+							<h3>Are you sure you want to delete "Recipe Name"?</h3>
+
+						</div>
+						<div className="modal-footer">
+							<button type="button" className="btn btn-default" data-dismiss="modal">CANCEL</button>
+							<button type="button" className="btn btn-danger" id="delete" data-delete="" onClick={() => this.props.onClick(props.recipe)}>DELETE</button>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>;
+		)
+	}
 }
 
 
 function Ingredient(props) {
 	var ingredientList = [];
 	for (var i=0; i < props.recipe.ingredients.length; i++) {
-	    ingredientList.push(<li key={i}>{props.recipe.ingredients[i]}</li>);
+	    ingredientList.push(<li key={props.index+''+i}>{props.recipe.ingredients[i]}</li>);
 	}
 
 	return <table className="table table-striped">
@@ -147,7 +258,7 @@ function Ingredients(props) {
 
 	return <div>
 			{recipes.map((recipe, index) =>
-				<Ingredient key={recipe.id}
+				<Ingredient key={'ingredient'+recipe.id}
 					recipe={recipe}
 					index={index+1} />
 				)}
@@ -176,11 +287,13 @@ class App extends React.Component {
 					ingredients: ['Ingredient 11','Ingredient 21','Ingredient 31']
 				}
 			],
+			recipeID: 3
 		}
+
+		this.addRecipe = this.addRecipe.bind(this);
 	}
 
 	componentWillMount(){
-
 		//save data. Will save to local storage first and fallback to cookies
 		storeLocal("recipes", this.state.recipes);
 		// Retrieve
@@ -188,16 +301,43 @@ class App extends React.Component {
 
 	}
 
-	handleClick(){
+	/**
+	 * Add a new recipe to our state
+	 */
+	addRecipe(inputState){
+		const ingredients = inputState.ingredients.split(",");
+		const d = new Date();
+
+		const newRecipe = {
+			id: inputState.recipeID,
+			name: inputState.name,
+			date: d.getMonth()+'/'+d.getDate()+'/'+d.getFullYear(),
+			description:  inputState.description,
+			instructions: inputState.instructions,
+			ingredients: ingredients
+		}
+
+		this.setState({
+			recipes: this.state.recipes.concat([newRecipe]),
+			recipeID: this.state.recipeID++
+		});
+
+	}
+
+	editRecipe(){
+
+	}
+
+	deleteRecipe(){
 
 	}
 
 	render() {
 		return <div>
 				<Ingredients recipes={this.state.recipes} />
-				<AddModal />
-				<EditModal />
-				<DeleteModal />
+				<AddModal onClick={this.addRecipe} />
+				<EditModal onClick={this.editRecipe} />
+				<DeleteModal onClick={this.deleteRecipe} />
 			</div>;
 	}
 }
