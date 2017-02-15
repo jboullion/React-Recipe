@@ -569,24 +569,7 @@ var App = function (_React$Component4) {
 
 		var _this7 = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this));
 
-		_this7.state = {
-			recipes: [{
-				id: 1,
-				name: 'Recipe 1',
-				date: '01/10/2017',
-				description: 'This is a description',
-				instructions: 'These are the instructions',
-				ingredients: ['Ingredient 1', 'Ingredient 2', 'Ingredient 3']
-			}, {
-				id: 2,
-				name: 'Recipe 2',
-				date: '01/11/2017',
-				description: 'This is a description 2',
-				instructions: 'These are the instructions about something else',
-				ingredients: ['Ingredient 11', 'Ingredient 21', 'Ingredient 31']
-			}],
-			recipeID: 3
-		};
+		_this7.state = {};
 
 		_this7.addRecipe = _this7.addRecipe.bind(_this7);
 		return _this7;
@@ -595,10 +578,41 @@ var App = function (_React$Component4) {
 	_createClass(App, [{
 		key: 'componentWillMount',
 		value: function componentWillMount() {
-			//save data. Will save to local storage first and fallback to cookies
-			storeLocal("recipes", this.state.recipes);
+			var recipes = [];
+			var recipeID = 0;
+
 			// Retrieve
-			var localRecipes = getLocal("recipes");
+			var recipeState = getLocal("recipeState");
+
+			if (recipeState !== null) {
+				console.log(recipeState);
+				recipes = recipeState.recipes;
+				recipeID = recipeState.recipeID;
+			} else {
+				//initial recipes
+				recipes = [{
+					id: 1,
+					name: 'Recipe 1',
+					date: '01/10/2017',
+					description: 'This is a description',
+					instructions: 'These are the instructions',
+					ingredients: ['Ingredient 1', 'Ingredient 2', 'Ingredient 3']
+				}, {
+					id: 2,
+					name: 'Recipe 2',
+					date: '01/11/2017',
+					description: 'This is a description 2',
+					instructions: 'These are the instructions about something else',
+					ingredients: ['Ingredient 11', 'Ingredient 21', 'Ingredient 31']
+				}];
+
+				recipeID = 3;
+			}
+
+			this.setState({
+				recipes: recipes,
+				recipeID: recipeID
+			});
 		}
 
 		/**
@@ -620,10 +634,14 @@ var App = function (_React$Component4) {
 				ingredients: ingredients
 			};
 
-			this.setState({
+			var newState = {
 				recipes: this.state.recipes.concat([newRecipe]),
 				recipeID: this.state.recipeID++
-			});
+			};
+
+			this.setState(newState);
+
+			storeLocal("recipeState", newState);
 		}
 	}, {
 		key: 'editRecipe',

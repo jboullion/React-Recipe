@@ -66,6 +66,7 @@ class AddModal extends React.Component {
 		if(hasErrors === false){
 			//Success!
 			this.props.onClick(this.state);
+
 		}else{
 			//Error!
 			this.setState({
@@ -268,8 +269,25 @@ function Ingredients(props) {
 class App extends React.Component {
 	constructor() {
 		super();
-		this.state = {
-			recipes: [
+		this.state = {}
+
+		this.addRecipe = this.addRecipe.bind(this);
+	}
+
+	componentWillMount(){
+		let recipes = [];
+		let recipeID = 0;
+
+		// Retrieve
+		var recipeState = getLocal("recipeState");
+
+		if( recipeState !== null){
+			console.log(recipeState);
+			recipes = recipeState.recipes;
+			recipeID = recipeState.recipeID;
+		}else{
+			//initial recipes
+			recipes = [
 				{
 					id: 1,
 					name: 'Recipe 1',
@@ -286,19 +304,16 @@ class App extends React.Component {
 					instructions: 'These are the instructions about something else',
 					ingredients: ['Ingredient 11','Ingredient 21','Ingredient 31']
 				}
-			],
-			recipeID: 3
+			];
+
+			recipeID = 3;
+
 		}
 
-		this.addRecipe = this.addRecipe.bind(this);
-	}
-
-	componentWillMount(){
-		//save data. Will save to local storage first and fallback to cookies
-		storeLocal("recipes", this.state.recipes);
-		// Retrieve
-		var localRecipes = getLocal("recipes");
-
+		this.setState({
+			recipes: recipes,
+			recipeID: recipeID
+		});
 	}
 
 	/**
@@ -317,11 +332,14 @@ class App extends React.Component {
 			ingredients: ingredients
 		}
 
-		this.setState({
+		const newState = {
 			recipes: this.state.recipes.concat([newRecipe]),
 			recipeID: this.state.recipeID++
-		});
+		};
 
+		this.setState(newState);
+
+		storeLocal("recipeState", newState);
 	}
 
 	editRecipe(){
