@@ -32,45 +32,16 @@ class AddModal extends React.Component {
 
 	//Validation and submission to parent for state change
 	handleSubmit(event) {
-		const errors = this.state.errors;
-		let hasErrors = false;
+		let results = validateIngredient(this.state);
 
-		if(! this.state.name){
-			errors.name = 'has-error';
-			hasErrors = true;
-		}else{
-			errors.name = '';
-		}
-
-		if(! this.state.description){
-			errors.description = 'has-error';
-			hasErrors = true;
-		}else{
-			errors.description = '';
-		}
-
-		if(! this.state.instructions){
-			errors.instructions = 'has-error';
-			hasErrors = true;
-		}else{
-			errors.instructions = '';
-		}
-
-		if(! this.state.ingredients){
-			errors.ingredients = 'has-error';
-			hasErrors = true;
-		}else{
-			errors.ingredients = '';
-		}
-
-		if(hasErrors === false){
+		if(results.hasErrors === false){
 			//Success!
 			this.props.onClick(this.state);
-
+			jQuery('#addModal').modal('hide');
 		}else{
 			//Error!
 			this.setState({
-				errors: errors
+				errors: results.errors
 			});
 		}
 
@@ -135,36 +106,89 @@ class EditModal extends React.Component {
 
 	constructor(props) {
 		super(props);
+		this.state = {
+			name: '',
+			description: '',
+			instructions: '',
+			ingredients: '',
+			errors: {
+				name: '',
+				description: '',
+				instructions: '',
+				ingredients: ''
+			}
+		};
+
+		this.handleInputChange = this.handleInputChange.bind(this);
+		this.handleSubmit = this.handleSubmit.bind(this);
+	}
+
+	//Set this components state based on the name of the input
+	handleInputChange(event) {
+		const value = event.target.value;
+		const name = event.target.name;
+
+		this.setState({
+			[name]: value
+		});
+	}
+
+	//Validation and submission to parent for state change
+	handleSubmit(event) {
+		let results = validateIngredient(this.state);
+
+		if(results.hasErrors === false){
+			//Success!
+			this.props.onClick(this.state);
+			jQuery('#addModal').modal('hide');
+		}else{
+			//Error!
+			this.setState({
+				errors: results.errors
+			});
+		}
 
 	}
 
 	render() {
 		return (
-		 <div className="modal fade" id="editModal" tabIndex="-1" role="dialog" aria-labelledby="editModalLabel">
+			<div className="modal fade" id="editModal" tabIndex="-1" role="dialog" aria-labelledby="editModalLabel">
 				<div className="modal-dialog" role="document">
 					<div className="modal-content">
 						<div className="modal-header">
 							<button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-							<h4 className="modal-title" id="addModalLabel">Edit Recipe</h4>
+							<h4 className="modal-title" id="editModalLabel">Edit Recipe</h4>
 						</div>
 						<div className="modal-body">
 							<table className="table">
 								<tbody>
 									<tr>
 										<th>Name</th>
-										<td><input type="text" className="form-control" id="edit-name"/></td>
+										<td className={this.state.errors.name}><input type="text" className="form-control" id="edit-name"
+										name="name"
+										value={this.state.name}
+										onChange={this.handleInputChange} /></td>
 									</tr>
 									<tr>
 										<th>Description</th>
-										<td><input type="text" className="form-control" id="edit-description"/></td>
+										<td className={this.state.errors.description}><input type="text" className="form-control" id="edit-description"
+										name="description"
+										value={this.state.description}
+										onChange={this.handleInputChange} /></td>
 									</tr>
 									<tr>
 										<th>Instructions</th>
-										<td><textarea className="form-control" style={{resize: "none"}} id="edit-instructions" rows="5"></textarea></td>
+										<td className={this.state.errors.instructions}><textarea className="form-control" style={{resize: "none"}} id="edit-instructions" rows="5"
+										name="instructions"
+										value={this.state.instructions}
+										onChange={this.handleInputChange} /></td>
 									</tr>
 									<tr>
 										<th>Ingredients</th>
-										<td><textarea className="form-control" style={{resize: "none"}} id="edit-ingredients" rows="5"></textarea></td>
+										<td className={this.state.errors.ingredients}><textarea className="form-control" style={{resize: "none"}} id="edit-ingredients" rows="5"
+										name="ingredients"
+										value={this.state.ingredients}
+										onChange={this.handleInputChange} /></td>
 									</tr>
 								</tbody>
 							</table>
@@ -172,7 +196,7 @@ class EditModal extends React.Component {
 						</div>
 						<div className="modal-footer">
 							<button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
-							<button type="button" className="btn btn-primary" id="edit-save" data-edit="" onClick={() => this.props.onClick(props.recipe)}>Save</button>
+							<button type="button" className="btn btn-primary" id="edit-save" onClick={() => this.handleSubmit(this.state)}>Save</button>
 						</div>
 					</div>
 				</div>
@@ -259,6 +283,7 @@ function Ingredients(props) {
 
 	return <div>
 			{recipes.map((recipe, index) =>
+
 				<Ingredient key={'ingredient'+recipe.id}
 					recipe={recipe}
 					index={index+1} />
@@ -282,7 +307,6 @@ class App extends React.Component {
 		var recipeState = getLocal("recipeState");
 
 		if( recipeState !== null){
-			console.log(recipeState);
 			recipes = recipeState.recipes;
 			recipeID = recipeState.recipeID;
 		}else{
@@ -291,7 +315,7 @@ class App extends React.Component {
 				{
 					id: 1,
 					name: 'Recipe 1',
-					date: '01/10/2017',
+					date: '1/10/2017',
 					description: 'This is a description',
 					instructions: 'These are the instructions',
 					ingredients: ['Ingredient 1','Ingredient 2','Ingredient 3']
@@ -299,7 +323,7 @@ class App extends React.Component {
 				{
 					id: 2,
 					name: 'Recipe 2',
-					date: '01/11/2017',
+					date: '1/11/2017',
 					description: 'This is a description 2',
 					instructions: 'These are the instructions about something else',
 					ingredients: ['Ingredient 11','Ingredient 21','Ingredient 31']
@@ -324,7 +348,7 @@ class App extends React.Component {
 		const d = new Date();
 
 		const newRecipe = {
-			id: inputState.recipeID,
+			id: this.state.recipeID,
 			name: inputState.name,
 			date: d.getMonth()+'/'+d.getDate()+'/'+d.getFullYear(),
 			description:  inputState.description,
@@ -334,7 +358,7 @@ class App extends React.Component {
 
 		const newState = {
 			recipes: this.state.recipes.concat([newRecipe]),
-			recipeID: this.state.recipeID++
+			recipeID: ++this.state.recipeID
 		};
 
 		this.setState(newState);
@@ -403,6 +427,7 @@ ReactDOM.render(
  		//if we do not have local storage for some reason try to use cookies
  		return JSON.parse(getCookie(name));
  	}
+
  }
 
  /**
@@ -445,3 +470,42 @@ ReactDOM.render(
  function deleteCookie(cname) {
  	setCookie(cname, '', -1);
  }
+
+
+function validateIngredient(ingredient, modalerrors){
+	let errors = ingredient.errors;
+	let hasErrors = false;
+
+	if(! ingredient.name){
+		errors.name = 'has-error';
+		hasErrors = true;
+	}else{
+		errors.name = '';
+	}
+
+	if(! ingredient.description){
+		errors.description = 'has-error';
+		hasErrors = true;
+	}else{
+		errors.description = '';
+	}
+
+	if(! ingredient.instructions){
+		errors.instructions = 'has-error';
+		hasErrors = true;
+	}else{
+		errors.instructions = '';
+	}
+
+	if(! ingredient.ingredients){
+		errors.ingredients = 'has-error';
+		hasErrors = true;
+	}else{
+		errors.ingredients = '';
+	}
+
+	return {
+		haserrors: hasErrors,
+		errors: errors
+	}
+}

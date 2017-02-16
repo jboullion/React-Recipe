@@ -53,44 +53,16 @@ var AddModal = function (_React$Component) {
 	}, {
 		key: 'handleSubmit',
 		value: function handleSubmit(event) {
-			var errors = this.state.errors;
-			var hasErrors = false;
+			var results = validateIngredient(this.state);
 
-			if (!this.state.name) {
-				errors.name = 'has-error';
-				hasErrors = true;
-			} else {
-				errors.name = '';
-			}
-
-			if (!this.state.description) {
-				errors.description = 'has-error';
-				hasErrors = true;
-			} else {
-				errors.description = '';
-			}
-
-			if (!this.state.instructions) {
-				errors.instructions = 'has-error';
-				hasErrors = true;
-			} else {
-				errors.instructions = '';
-			}
-
-			if (!this.state.ingredients) {
-				errors.ingredients = 'has-error';
-				hasErrors = true;
-			} else {
-				errors.ingredients = '';
-			}
-
-			if (hasErrors === false) {
+			if (results.hasErrors === false) {
 				//Success!
 				this.props.onClick(this.state);
+				jQuery('#addModal').modal('hide');
 			} else {
 				//Error!
 				this.setState({
-					errors: errors
+					errors: results.errors
 				});
 			}
 		}
@@ -237,10 +209,57 @@ var EditModal = function (_React$Component2) {
 	function EditModal(props) {
 		_classCallCheck(this, EditModal);
 
-		return _possibleConstructorReturn(this, (EditModal.__proto__ || Object.getPrototypeOf(EditModal)).call(this, props));
+		var _this3 = _possibleConstructorReturn(this, (EditModal.__proto__ || Object.getPrototypeOf(EditModal)).call(this, props));
+
+		_this3.state = {
+			name: '',
+			description: '',
+			instructions: '',
+			ingredients: '',
+			errors: {
+				name: '',
+				description: '',
+				instructions: '',
+				ingredients: ''
+			}
+		};
+
+		_this3.handleInputChange = _this3.handleInputChange.bind(_this3);
+		_this3.handleSubmit = _this3.handleSubmit.bind(_this3);
+		return _this3;
 	}
 
+	//Set this components state based on the name of the input
+
+
 	_createClass(EditModal, [{
+		key: 'handleInputChange',
+		value: function handleInputChange(event) {
+			var value = event.target.value;
+			var name = event.target.name;
+
+			this.setState(_defineProperty({}, name, value));
+		}
+
+		//Validation and submission to parent for state change
+
+	}, {
+		key: 'handleSubmit',
+		value: function handleSubmit(event) {
+			var results = validateIngredient(this.state);
+
+			if (results.hasErrors === false) {
+				//Success!
+				this.props.onClick(this.state);
+				jQuery('#addModal').modal('hide');
+			} else {
+				//Error!
+				this.setState({
+					errors: results.errors
+				});
+			}
+		}
+	}, {
 		key: 'render',
 		value: function render() {
 			var _this4 = this;
@@ -268,7 +287,7 @@ var EditModal = function (_React$Component2) {
 							),
 							React.createElement(
 								'h4',
-								{ className: 'modal-title', id: 'addModalLabel' },
+								{ className: 'modal-title', id: 'editModalLabel' },
 								'Edit Recipe'
 							)
 						),
@@ -291,8 +310,11 @@ var EditModal = function (_React$Component2) {
 										),
 										React.createElement(
 											'td',
-											null,
-											React.createElement('input', { type: 'text', className: 'form-control', id: 'edit-name' })
+											{ className: this.state.errors.name },
+											React.createElement('input', { type: 'text', className: 'form-control', id: 'edit-name',
+												name: 'name',
+												value: this.state.name,
+												onChange: this.handleInputChange })
 										)
 									),
 									React.createElement(
@@ -305,8 +327,11 @@ var EditModal = function (_React$Component2) {
 										),
 										React.createElement(
 											'td',
-											null,
-											React.createElement('input', { type: 'text', className: 'form-control', id: 'edit-description' })
+											{ className: this.state.errors.description },
+											React.createElement('input', { type: 'text', className: 'form-control', id: 'edit-description',
+												name: 'description',
+												value: this.state.description,
+												onChange: this.handleInputChange })
 										)
 									),
 									React.createElement(
@@ -319,8 +344,11 @@ var EditModal = function (_React$Component2) {
 										),
 										React.createElement(
 											'td',
-											null,
-											React.createElement('textarea', { className: 'form-control', style: { resize: "none" }, id: 'edit-instructions', rows: '5' })
+											{ className: this.state.errors.instructions },
+											React.createElement('textarea', { className: 'form-control', style: { resize: "none" }, id: 'edit-instructions', rows: '5',
+												name: 'instructions',
+												value: this.state.instructions,
+												onChange: this.handleInputChange })
 										)
 									),
 									React.createElement(
@@ -333,8 +361,11 @@ var EditModal = function (_React$Component2) {
 										),
 										React.createElement(
 											'td',
-											null,
-											React.createElement('textarea', { className: 'form-control', style: { resize: "none" }, id: 'edit-ingredients', rows: '5' })
+											{ className: this.state.errors.ingredients },
+											React.createElement('textarea', { className: 'form-control', style: { resize: "none" }, id: 'edit-ingredients', rows: '5',
+												name: 'ingredients',
+												value: this.state.ingredients,
+												onChange: this.handleInputChange })
 										)
 									)
 								)
@@ -350,8 +381,8 @@ var EditModal = function (_React$Component2) {
 							),
 							React.createElement(
 								'button',
-								{ type: 'button', className: 'btn btn-primary', id: 'edit-save', 'data-edit': '', onClick: function onClick() {
-										return _this4.props.onClick(props.recipe);
+								{ type: 'button', className: 'btn btn-primary', id: 'edit-save', onClick: function onClick() {
+										return _this4.handleSubmit(_this4.state);
 									} },
 								'Save'
 							)
@@ -585,7 +616,6 @@ var App = function (_React$Component4) {
 			var recipeState = getLocal("recipeState");
 
 			if (recipeState !== null) {
-				console.log(recipeState);
 				recipes = recipeState.recipes;
 				recipeID = recipeState.recipeID;
 			} else {
@@ -593,14 +623,14 @@ var App = function (_React$Component4) {
 				recipes = [{
 					id: 1,
 					name: 'Recipe 1',
-					date: '01/10/2017',
+					date: '1/10/2017',
 					description: 'This is a description',
 					instructions: 'These are the instructions',
 					ingredients: ['Ingredient 1', 'Ingredient 2', 'Ingredient 3']
 				}, {
 					id: 2,
 					name: 'Recipe 2',
-					date: '01/11/2017',
+					date: '1/11/2017',
 					description: 'This is a description 2',
 					instructions: 'These are the instructions about something else',
 					ingredients: ['Ingredient 11', 'Ingredient 21', 'Ingredient 31']
@@ -626,7 +656,7 @@ var App = function (_React$Component4) {
 			var d = new Date();
 
 			var newRecipe = {
-				id: inputState.recipeID,
+				id: this.state.recipeID,
 				name: inputState.name,
 				date: d.getMonth() + '/' + d.getDate() + '/' + d.getFullYear(),
 				description: inputState.description,
@@ -636,7 +666,7 @@ var App = function (_React$Component4) {
 
 			var newState = {
 				recipes: this.state.recipes.concat([newRecipe]),
-				recipeID: this.state.recipeID++
+				recipeID: ++this.state.recipeID
 			};
 
 			this.setState(newState);
@@ -744,4 +774,42 @@ function getCookie(cname) {
  */
 function deleteCookie(cname) {
 	setCookie(cname, '', -1);
+}
+
+function validateIngredient(ingredient, modalerrors) {
+	var errors = ingredient.errors;
+	var hasErrors = false;
+
+	if (!ingredient.name) {
+		errors.name = 'has-error';
+		hasErrors = true;
+	} else {
+		errors.name = '';
+	}
+
+	if (!ingredient.description) {
+		errors.description = 'has-error';
+		hasErrors = true;
+	} else {
+		errors.description = '';
+	}
+
+	if (!ingredient.instructions) {
+		errors.instructions = 'has-error';
+		hasErrors = true;
+	} else {
+		errors.instructions = '';
+	}
+
+	if (!ingredient.ingredients) {
+		errors.ingredients = 'has-error';
+		hasErrors = true;
+	} else {
+		errors.ingredients = '';
+	}
+
+	return {
+		haserrors: hasErrors,
+		errors: errors
+	};
 }
