@@ -212,10 +212,13 @@ var EditModal = function (_React$Component2) {
 		var _this3 = _possibleConstructorReturn(this, (EditModal.__proto__ || Object.getPrototypeOf(EditModal)).call(this, props));
 
 		_this3.state = {
+
+			id: null,
 			name: '',
 			description: '',
 			instructions: '',
 			ingredients: '',
+
 			errors: {
 				name: '',
 				description: '',
@@ -226,6 +229,7 @@ var EditModal = function (_React$Component2) {
 
 		_this3.handleInputChange = _this3.handleInputChange.bind(_this3);
 		_this3.handleSubmit = _this3.handleSubmit.bind(_this3);
+		_this3.componentWillReceiveProps = _this3.componentWillReceiveProps.bind(_this3);
 		return _this3;
 	}
 
@@ -251,11 +255,27 @@ var EditModal = function (_React$Component2) {
 			if (results.hasErrors === false) {
 				//Success!
 				this.props.onClick(this.state);
-				jQuery('#addModal').modal('hide');
+				jQuery('#editModal').modal('hide');
 			} else {
 				//Error!
 				this.setState({
 					errors: results.errors
+				});
+			}
+		}
+
+		//when the user clicks on any of the "Edit" buttons, we have to update our modal so it contains the new information
+
+	}, {
+		key: 'componentWillReceiveProps',
+		value: function componentWillReceiveProps(nextProps) {
+			if (nextProps.recipe.id !== this.state.id) {
+				this.setState({
+					id: nextProps.recipe.id,
+					name: nextProps.recipe.name,
+					description: nextProps.recipe.description,
+					instructions: nextProps.recipe.instructions,
+					ingredients: nextProps.recipe.ingredients
 				});
 			}
 		}
@@ -515,7 +535,9 @@ function Ingredient(props) {
 					{ className: 'edit' },
 					React.createElement(
 						'button',
-						{ type: 'button', className: 'btn btn-warning', 'data-toggle': 'modal', 'data-target': '#editModal', 'data-recipe': props.recipe.id },
+						{ type: 'button', className: 'btn btn-warning', 'data-toggle': 'modal', 'data-target': '#editModal', onClick: function onClick() {
+								return props.setupEdit(props.recipe);
+							} },
 						'Edit'
 					)
 				),
@@ -580,14 +602,15 @@ function Ingredient(props) {
 
 function Ingredients(props) {
 	var recipes = props.recipes;
-
+	var setupEdit = props.setupEdit;
 	return React.createElement(
 		'div',
 		null,
 		recipes.map(function (recipe, index) {
 			return React.createElement(Ingredient, { key: 'ingredient' + recipe.id,
 				recipe: recipe,
-				index: index + 1 });
+				index: index + 1,
+				setupEdit: setupEdit });
 		})
 	);
 }
@@ -600,9 +623,21 @@ var App = function (_React$Component4) {
 
 		var _this7 = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this));
 
-		_this7.state = {};
+		_this7.state = {
+			edit: {
+				id: null,
+				name: '',
+				date: '',
+				description: '',
+				instructions: '',
+				ingredients: []
+			}
+		};
 
 		_this7.addRecipe = _this7.addRecipe.bind(_this7);
+		_this7.setupEdit = _this7.setupEdit.bind(_this7);
+		_this7.editRecipe = _this7.editRecipe.bind(_this7);
+		_this7.deleteRecipe = _this7.deleteRecipe.bind(_this7);
 		return _this7;
 	}
 
@@ -675,7 +710,47 @@ var App = function (_React$Component4) {
 		}
 	}, {
 		key: 'editRecipe',
-		value: function editRecipe() {}
+		value: function editRecipe(_editRecipe) {
+			var didEdit = false;
+			var recipeList = this.state.recipes;
+
+			if (_editRecipe) {
+
+				for (var i = 0; i < recipeList.length; i++) {
+					//which recipe are we editing?
+					if (recipeList[i].id === _editRecipe.id) {
+						recipeList[i] = _editRecipe;
+						didEdit = true;
+						break;
+					}
+				}
+
+				//if we edited one of our recipes
+				if (didEdit) {
+					if (typeof recipeList.ingredients === 'string') {
+						recipeList.ingredients = recipeList.ingredients.split(",");
+					}
+
+					this.setState({
+						recipes: recipeList
+					});
+
+					var newState = {
+						recipes: recipeList,
+						recipeID: this.state.recipeID
+					};
+
+					storeLocal("recipeState", newState);
+				}
+			}
+		}
+	}, {
+		key: 'setupEdit',
+		value: function setupEdit(recipe) {
+			this.setState({
+				edit: recipe
+			});
+		}
 	}, {
 		key: 'deleteRecipe',
 		value: function deleteRecipe() {}
@@ -685,9 +760,9 @@ var App = function (_React$Component4) {
 			return React.createElement(
 				'div',
 				null,
-				React.createElement(Ingredients, { recipes: this.state.recipes }),
+				React.createElement(Ingredients, { recipes: this.state.recipes, setupEdit: this.setupEdit }),
 				React.createElement(AddModal, { onClick: this.addRecipe }),
-				React.createElement(EditModal, { onClick: this.editRecipe }),
+				React.createElement(EditModal, { onClick: this.editRecipe, recipe: this.state.edit }),
 				React.createElement(DeleteModal, { onClick: this.deleteRecipe })
 			);
 		}
@@ -809,7 +884,7 @@ function validateIngredient(ingredient, modalerrors) {
 	}
 
 	return {
-		haserrors: hasErrors,
+		hasErrors: hasErrors,
 		errors: errors
 	};
 }
