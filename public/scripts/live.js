@@ -212,7 +212,6 @@ var EditModal = function (_React$Component2) {
 		var _this3 = _possibleConstructorReturn(this, (EditModal.__proto__ || Object.getPrototypeOf(EditModal)).call(this, props));
 
 		_this3.state = {
-
 			id: null,
 			name: '',
 			description: '',
@@ -422,10 +421,38 @@ var DeleteModal = function (_React$Component3) {
 	function DeleteModal(props) {
 		_classCallCheck(this, DeleteModal);
 
-		return _possibleConstructorReturn(this, (DeleteModal.__proto__ || Object.getPrototypeOf(DeleteModal)).call(this, props));
+		var _this5 = _possibleConstructorReturn(this, (DeleteModal.__proto__ || Object.getPrototypeOf(DeleteModal)).call(this, props));
+
+		_this5.state = {
+			id: null,
+			name: '',
+			description: '',
+			instructions: '',
+			ingredients: ''
+		};
+
+		_this5.componentWillReceiveProps = _this5.componentWillReceiveProps.bind(_this5);
+		return _this5;
 	}
 
+	//when the user clicks on any of the "Delete" buttons, we have to update our modal so it contains the new information
+
+
 	_createClass(DeleteModal, [{
+		key: 'componentWillReceiveProps',
+		value: function componentWillReceiveProps(nextProps) {
+
+			if (nextProps.recipe && nextProps.recipe.id !== this.state.id) {
+				this.setState({
+					id: nextProps.recipe.id,
+					name: nextProps.recipe.name,
+					description: nextProps.recipe.description,
+					instructions: nextProps.recipe.instructions,
+					ingredients: nextProps.recipe.ingredients
+				});
+			}
+		}
+	}, {
 		key: 'render',
 		value: function render() {
 			var _this6 = this;
@@ -463,7 +490,9 @@ var DeleteModal = function (_React$Component3) {
 							React.createElement(
 								'h3',
 								null,
-								'Are you sure you want to delete "Recipe Name"?'
+								'Are you sure you want to delete ',
+								'"' + this.state.name + '"',
+								'?'
 							)
 						),
 						React.createElement(
@@ -477,7 +506,7 @@ var DeleteModal = function (_React$Component3) {
 							React.createElement(
 								'button',
 								{ type: 'button', className: 'btn btn-danger', id: 'delete', 'data-delete': '', onClick: function onClick() {
-										return _this6.props.onClick(props.recipe);
+										return _this6.props.onClick(_this6.state);
 									} },
 								'DELETE'
 							)
@@ -546,7 +575,9 @@ function Ingredient(props) {
 					{ className: 'delete' },
 					React.createElement(
 						'button',
-						{ type: 'button', className: 'btn btn-danger', 'data-toggle': 'modal', 'data-target': '#deleteModal', 'data-recipe': props.recipe.id },
+						{ type: 'button', className: 'btn btn-danger', 'data-toggle': 'modal', 'data-target': '#deleteModal', onClick: function onClick() {
+								return props.setupDelete(props.recipe);
+							} },
 						'Delete'
 					)
 				)
@@ -603,6 +634,7 @@ function Ingredient(props) {
 function Ingredients(props) {
 	var recipes = props.recipes;
 	var setupEdit = props.setupEdit;
+	var setupDelete = props.setupDelete;
 	return React.createElement(
 		'div',
 		null,
@@ -610,7 +642,8 @@ function Ingredients(props) {
 			return React.createElement(Ingredient, { key: 'ingredient' + recipe.id,
 				recipe: recipe,
 				index: index + 1,
-				setupEdit: setupEdit });
+				setupEdit: setupEdit,
+				setupDelete: setupDelete });
 		})
 	);
 }
@@ -623,20 +656,23 @@ var App = function (_React$Component4) {
 
 		var _this7 = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this));
 
+		var emptyRecipe = {
+			id: null,
+			name: '',
+			date: '',
+			description: '',
+			instructions: '',
+			ingredients: []
+		};
+
 		_this7.state = {
-			edit: {
-				id: null,
-				name: '',
-				date: '',
-				description: '',
-				instructions: '',
-				ingredients: []
-			}
+			edit: emptyRecipe
 		};
 
 		_this7.addRecipe = _this7.addRecipe.bind(_this7);
 		_this7.setupEdit = _this7.setupEdit.bind(_this7);
 		_this7.editRecipe = _this7.editRecipe.bind(_this7);
+		_this7.setupDelete = _this7.setupDelete.bind(_this7);
 		_this7.deleteRecipe = _this7.deleteRecipe.bind(_this7);
 		return _this7;
 	}
@@ -686,16 +722,16 @@ var App = function (_React$Component4) {
 
 	}, {
 		key: 'addRecipe',
-		value: function addRecipe(inputState) {
-			var ingredients = inputState.ingredients.split(",");
+		value: function addRecipe(_addRecipe) {
+			var ingredients = _addRecipe.ingredients.split(",");
 			var d = new Date();
 
 			var newRecipe = {
 				id: this.state.recipeID,
-				name: inputState.name,
+				name: _addRecipe.name,
 				date: d.getMonth() + '/' + d.getDate() + '/' + d.getFullYear(),
-				description: inputState.description,
-				instructions: inputState.instructions,
+				description: _addRecipe.description,
+				instructions: _addRecipe.instructions,
 				ingredients: ingredients
 			};
 
@@ -720,6 +756,10 @@ var App = function (_React$Component4) {
 					//which recipe are we editing?
 					if (recipeList[i].id === _editRecipe.id) {
 						recipeList[i] = _editRecipe;
+
+						var d = new Date();
+						//set new date for this recipe
+						recipeList[i].date = d.getMonth() + '/' + d.getDate() + '/' + d.getFullYear();
 						didEdit = true;
 						break;
 					}
@@ -736,8 +776,7 @@ var App = function (_React$Component4) {
 					});
 
 					var newState = {
-						recipes: recipeList,
-						recipeID: this.state.recipeID
+						recipes: recipeList
 					};
 
 					storeLocal("recipeState", newState);
@@ -752,18 +791,57 @@ var App = function (_React$Component4) {
 			});
 		}
 	}, {
+		key: 'setupDelete',
+		value: function setupDelete(recipe) {
+			this.setState({
+				delete: recipe
+			});
+		}
+	}, {
 		key: 'deleteRecipe',
-		value: function deleteRecipe() {}
+		value: function deleteRecipe(_deleteRecipe) {
+			console.log('deleteRecipe');
+			var didDelete = false;
+			var recipeList = this.state.recipes;
+
+			if (_deleteRecipe) {
+
+				for (var i = 0; i < recipeList.length; i++) {
+					//which recipe are we editing?
+					if (recipeList[i].id === _deleteRecipe.id) {
+						recipeList.splice(i, 1);
+						didDelete = true;
+						break;
+					}
+				}
+
+				//if we deleted one of our recipes
+				if (didDelete) {
+
+					this.setState({
+						recipes: recipeList
+					});
+
+					var newState = {
+						recipes: recipeList
+					};
+
+					storeLocal("recipeState", newState);
+
+					jQuery('#deleteModal').modal('hide');
+				}
+			}
+		}
 	}, {
 		key: 'render',
 		value: function render() {
 			return React.createElement(
 				'div',
 				null,
-				React.createElement(Ingredients, { recipes: this.state.recipes, setupEdit: this.setupEdit }),
+				React.createElement(Ingredients, { recipes: this.state.recipes, setupEdit: this.setupEdit, setupDelete: this.setupDelete }),
 				React.createElement(AddModal, { onClick: this.addRecipe }),
 				React.createElement(EditModal, { onClick: this.editRecipe, recipe: this.state.edit }),
-				React.createElement(DeleteModal, { onClick: this.deleteRecipe })
+				React.createElement(DeleteModal, { onClick: this.deleteRecipe, recipe: this.state.delete })
 			);
 		}
 	}]);

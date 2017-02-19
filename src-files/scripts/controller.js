@@ -108,7 +108,6 @@ class EditModal extends React.Component {
 		super(props);
 
 		this.state = {
-
 			id: null,
 			name: '',
 			description: '',
@@ -152,7 +151,6 @@ class EditModal extends React.Component {
 				errors: results.errors
 			});
 		}
-
 	}
 
 	//when the user clicks on any of the "Edit" buttons, we have to update our modal so it contains the new information
@@ -229,6 +227,30 @@ class DeleteModal extends React.Component {
 	constructor(props) {
 		super(props);
 
+		this.state = {
+			id: null,
+			name: '',
+			description: '',
+			instructions: '',
+			ingredients: ''
+		};
+
+		this.componentWillReceiveProps = this.componentWillReceiveProps.bind(this);
+	}
+
+	//when the user clicks on any of the "Delete" buttons, we have to update our modal so it contains the new information
+	componentWillReceiveProps(nextProps){
+
+		if(nextProps.recipe && nextProps.recipe.id !== this.state.id){
+			this.setState({
+				id: nextProps.recipe.id,
+				name: nextProps.recipe.name,
+				description: nextProps.recipe.description,
+				instructions: nextProps.recipe.instructions,
+				ingredients: nextProps.recipe.ingredients,
+			});
+		}
+
 	}
 
 	render() {
@@ -241,12 +263,11 @@ class DeleteModal extends React.Component {
 							<h4 className="modal-title" id="addModalLabel">Delete Recipe</h4>
 						</div>
 						<div className="modal-body">
-							<h3>Are you sure you want to delete "Recipe Name"?</h3>
-
+							<h3>Are you sure you want to delete {'"'+this.state.name+'"'}?</h3>
 						</div>
 						<div className="modal-footer">
 							<button type="button" className="btn btn-default" data-dismiss="modal">CANCEL</button>
-							<button type="button" className="btn btn-danger" id="delete" data-delete="" onClick={() => this.props.onClick(props.recipe)}>DELETE</button>
+							<button type="button" className="btn btn-danger" id="delete" data-delete="" onClick={() => this.props.onClick(this.state)}>DELETE</button>
 						</div>
 					</div>
 				</div>
@@ -270,7 +291,7 @@ function Ingredient(props) {
 					<td className="description" data-toggle="collapse" href={'#recipe-'+props.recipe.id} aria-expanded="false">{props.recipe.description}</td>
 					<td className="date" data-toggle="collapse" href={'#recipe-'+props.recipe.id} aria-expanded="false">{props.recipe.date}</td>
 					<td className="edit"><button type="button" className="btn btn-warning" data-toggle="modal" data-target="#editModal" onClick={() => props.setupEdit(props.recipe)}>Edit</button></td>
-					<td className="delete"><button type="button" className="btn btn-danger" data-toggle="modal" data-target="#deleteModal" data-recipe={props.recipe.id}>Delete</button></td>
+					<td className="delete"><button type="button" className="btn btn-danger" data-toggle="modal" data-target="#deleteModal" onClick={() => props.setupDelete(props.recipe)}>Delete</button></td>
 				</tr>
 				<tr className={'recipe-'+props.recipe.id}>
 					<td colSpan="6">
@@ -300,13 +321,15 @@ function Ingredient(props) {
 function Ingredients(props) {
 	const recipes = props.recipes;
 	const setupEdit = props.setupEdit;
+	const setupDelete = props.setupDelete;
 	return <div>
 			{recipes.map((recipe, index) =>
 
 				<Ingredient key={'ingredient'+recipe.id}
 					recipe={recipe}
 					index={index+1}
-					setupEdit={setupEdit} />
+					setupEdit={setupEdit}
+					setupDelete={setupDelete} />
 				)}
 			</div>;
 }
@@ -314,20 +337,23 @@ function Ingredients(props) {
 class App extends React.Component {
 	constructor() {
 		super();
+		const emptyRecipe = {
+			id: null,
+			name: '',
+			date: '',
+			description: '',
+			instructions: '',
+			ingredients: []
+		};
+
 		this.state = {
-			edit: {
-				id: null,
-				name: '',
-				date: '',
-				description: '',
-				instructions: '',
-				ingredients: []
-			}
+			edit: emptyRecipe
 		}
 
 		this.addRecipe = this.addRecipe.bind(this);
 		this.setupEdit = this.setupEdit.bind(this);
 		this.editRecipe = this.editRecipe.bind(this);
+		this.setupDelete = this.setupDelete.bind(this);
 		this.deleteRecipe = this.deleteRecipe.bind(this);
 	}
 
@@ -375,16 +401,16 @@ class App extends React.Component {
 	/**
 	 * Add a new recipe to our state
 	 */
-	addRecipe(inputState){
-		const ingredients = inputState.ingredients.split(",");
+	addRecipe(addRecipe){
+		const ingredients = addRecipe.ingredients.split(",");
 		const d = new Date();
 
 		const newRecipe = {
 			id: this.state.recipeID,
-			name: inputState.name,
+			name: addRecipe.name,
 			date: d.getMonth()+'/'+d.getDate()+'/'+d.getFullYear(),
-			description:  inputState.description,
-			instructions: inputState.instructions,
+			description:  addRecipe.description,
+			instructions: addRecipe.instructions,
 			ingredients: ingredients
 		}
 
@@ -408,6 +434,10 @@ class App extends React.Component {
 				//which recipe are we editing?
 				if(recipeList[i].id === editRecipe.id){
 					recipeList[i] = editRecipe;
+
+					const d = new Date();
+					//set new date for this recipe
+					recipeList[i].date = d.getMonth()+'/'+d.getDate()+'/'+d.getFullYear();
 					didEdit = true;
 					break;
 				}
@@ -424,8 +454,7 @@ class App extends React.Component {
 				});
 
 				const newState = {
-					recipes: recipeList,
-					recipeID: this.state.recipeID
+					recipes: recipeList
 				};
 
 				storeLocal("recipeState", newState);
@@ -439,16 +468,52 @@ class App extends React.Component {
 		});
 	}
 
-	deleteRecipe(){
+	setupDelete(recipe){
+		this.setState({
+			delete: recipe
+		});
+	}
 
+	deleteRecipe(deleteRecipe){
+		console.log('deleteRecipe');
+		let didDelete = false;
+		const recipeList = this.state.recipes;
+
+		if(deleteRecipe){
+
+			for(var i = 0; i < recipeList.length; i++){
+				//which recipe are we editing?
+				if(recipeList[i].id === deleteRecipe.id){
+					recipeList.splice(i, 1);
+					didDelete = true;
+					break;
+				}
+			}
+
+			//if we deleted one of our recipes
+			if(didDelete){
+
+				this.setState({
+					recipes: recipeList
+				});
+
+				const newState = {
+					recipes: recipeList
+				};
+
+				storeLocal("recipeState", newState);
+
+				jQuery('#deleteModal').modal('hide');
+			}
+		}
 	}
 
 	render() {
 		return <div>
-				<Ingredients recipes={this.state.recipes} setupEdit={this.setupEdit} />
+				<Ingredients recipes={this.state.recipes} setupEdit={this.setupEdit} setupDelete={this.setupDelete} />
 				<AddModal onClick={this.addRecipe} />
 				<EditModal onClick={this.editRecipe} recipe={this.state.edit} />
-				<DeleteModal onClick={this.deleteRecipe} />
+				<DeleteModal onClick={this.deleteRecipe} recipe={this.state.delete} />
 			</div>;
 	}
 }
