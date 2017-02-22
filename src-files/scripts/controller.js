@@ -475,7 +475,6 @@ class App extends React.Component {
 	}
 
 	deleteRecipe(deleteRecipe){
-		console.log('deleteRecipe');
 		let didDelete = false;
 		const recipeList = this.state.recipes;
 

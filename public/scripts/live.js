@@ -800,7 +800,6 @@ var App = function (_React$Component4) {
 	}, {
 		key: 'deleteRecipe',
 		value: function deleteRecipe(_deleteRecipe) {
-			console.log('deleteRecipe');
 			var didDelete = false;
 			var recipeList = this.state.recipes;
 
